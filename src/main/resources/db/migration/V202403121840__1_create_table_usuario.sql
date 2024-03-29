@@ -1,0 +1,13 @@
+
+-- V1__Create_Tabela_Usuario.sql
+
+
+CREATE TABLE IF NOT EXISTS USUARIO (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    documento VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    login VARCHAR(255) NOT NULL UNIQUE,
+    saldo NUMERIC
+);
