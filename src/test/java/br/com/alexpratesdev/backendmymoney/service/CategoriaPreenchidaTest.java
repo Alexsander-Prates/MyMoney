@@ -7,6 +7,7 @@ import br.com.alexpratesdev.backendmymoney.repository.CategoriaRepository;
 import br.com.alexpratesdev.backendmymoney.repository.UsuarioRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 
+import static org.hibernate.sql.ast.SqlTreeCreationLogger.LOGGER;
 import static org.mockito.Mockito.*;
 
 
@@ -32,6 +34,7 @@ public class CategoriaPreenchidaTest {
     }
 
     @Test
+    @DisplayName("Verificação valores passados com banco de dados salvo")
     public void inserirCategoriaPreenchidaTest() throws Exception {
 
         //preparando ambiente para testes mockando o recebimento do front end
@@ -70,5 +73,48 @@ public class CategoriaPreenchidaTest {
 
         //3º Teste - verificar se o atual valor é igual ao salvo no banco de dados.
         Assertions.assertEquals(esperado,atual);
+    }
+
+
+    @Test
+    @DisplayName("Verificação valores passados com banco de dados salvo error")
+    public void inserirCategoriaPreenchidaTestError() throws Exception {
+
+        //preparando ambiente para testes mockando o recebimento do front end
+        CategoriaDTO categoriaDTO = mock(CategoriaDTO.class);
+        when(categoriaDTO.getNome()).thenReturn("Mercado");
+        when(categoriaDTO.getDescricao()).thenReturn("Teste");
+        when(categoriaDTO.getUsuario_id()).thenReturn(1L);
+        when(categoriaDTO.getUsuario_id()).thenReturn(1L);
+
+        CategoriaDTO categoriaDTO1 = new CategoriaDTO();
+        categoriaDTO1.setNome(categoriaDTO.getNome());
+        categoriaDTO1.setId(categoriaDTO.getId());
+        categoriaDTO1.setUsuario_id(categoriaDTO.getUsuario_id());
+        categoriaDTO1.setDescricao(categoriaDTO.getDescricao());
+
+        //transformando em CategoriaEntity para persistência no banco de dados
+        CategoriaEntity categoriaEntity = new CategoriaEntity();
+        categoriaEntity.setNome(categoriaDTO1.getNome());
+        categoriaEntity.setDescricao(categoriaDTO1.getDescricao());
+        categoriaEntity.setId(categoriaDTO1.getId());
+
+        //configurando o método save para salvar no banco de dados quando for chamado.
+        when(categoriaRepository.save(any(CategoriaEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CategoriaEntity salvarCategoriaEntity = categoriaRepository.save(categoriaEntity);
+
+
+        String atualErrado = "valor error";
+        when(categoriaRepository.findById(anyLong())).thenReturn(Optional.of(salvarCategoriaEntity));
+        String esperado = categoriaRepository.findById(salvarCategoriaEntity.getId()).map(CategoriaEntity::getNome).get();
+
+        //1º Teste - verificar se o atual valor é igual ao salvo no banco de dados.
+        Assertions.assertNotEquals(esperado,atualErrado);
+        if (!esperado.equals(atualErrado)) {
+            String mensagem = "assertNotEquals - Os nomes das categorias são diferentes";
+            LOGGER.info(mensagem);
+            //Assertions.fail(mensagem);
+        }
     }
 }

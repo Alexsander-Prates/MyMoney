@@ -81,7 +81,7 @@ public class UsuarioLogadoTest {
     }
 
     @Test
-    @DisplayName("Teste de falha no token com assertNotEquals")
+    @DisplayName("Teste de falha no token com assertNotEquals e assertions.fail")
     public void userarioLogadoTestTokenErrado() throws Exception {
 
         RegistroUsuarioDTO registroUsuarioDTO = mock(RegistroUsuarioDTO.class);
