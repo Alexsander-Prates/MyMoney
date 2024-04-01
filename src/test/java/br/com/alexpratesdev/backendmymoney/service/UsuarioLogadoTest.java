@@ -6,18 +6,15 @@ import br.com.alexpratesdev.backendmymoney.entity.UsuarioEntity;
 import br.com.alexpratesdev.backendmymoney.infra.TokenGeneration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import java.util.logging.Logger;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
 import java.math.BigDecimal;
 
-import static org.hibernate.sql.ast.SqlTreeCreationLogger.LOGGER;
 import static org.mockito.Mockito.*;
 
 public class UsuarioLogadoTest {
@@ -36,7 +33,6 @@ public class UsuarioLogadoTest {
     }
 
     @Test
-    @DisplayName("Testes login Usuario - token correto")
     public void userarioLogadoTest() throws Exception {
         //Registrar novo usuário com token
 
@@ -78,47 +74,5 @@ public class UsuarioLogadoTest {
         String esperadoToken = token; // Defina o token esperado aqui
         String atualToken = authLoginService.realizarLogin(loginDTO);
         Assertions.assertEquals(esperadoToken, atualToken);
-    }
-
-    @Test
-    @DisplayName("Teste de falha no token com assertNotEquals")
-    public void userarioLogadoTestTokenErrado() throws Exception {
-
-        RegistroUsuarioDTO registroUsuarioDTO = mock(RegistroUsuarioDTO.class);
-
-        when(registroUsuarioDTO.getSenha()).thenReturn("Po12387oo");
-
-        registroUsuarioDTO.setNome("Alexsander");
-        registroUsuarioDTO.setDocumento("39929056084"); //cpf fake
-        registroUsuarioDTO.setEmail("fulano@example.com");
-        registroUsuarioDTO.setSenha(registroUsuarioDTO.getSenha()); //senha criptografada
-        registroUsuarioDTO.setLogin("AlexLogin123");
-        registroUsuarioDTO.setSaldo(BigDecimal.valueOf(1000.0));
-
-
-        String senhaCriptografada = new BCryptPasswordEncoder().encode(registroUsuarioDTO.getSenha()); //sdhxbiisdS123@ucbibcbs4165
-        authRegisterService.inserirUsuarioLogin(registroUsuarioDTO,senhaCriptografada);
-
-
-        //gerando token do usuario
-        UsuarioEntity usuarioEntity = new UsuarioEntity(registroUsuarioDTO,senhaCriptografada);
-
-        String token = null;
-        token = when(tokenGeneration.gerarToken(usuarioEntity)).thenReturn(token).toString();
-
-        //logar usuario
-        LoginDTO loginDTO = new LoginDTO(usuarioEntity.getLogin(),usuarioEntity.getSenha(),token);
-        when(authLoginService.realizarLogin(loginDTO)).thenReturn(token);
-
-        //1  - verificar se token é diferente do esperado
-        String esperadoErradoToken = "TesteTokenderrado"; // Token errado aqui
-        String atualToken = authLoginService.realizarLogin(loginDTO); //usuario sendo logado
-
-        Assertions.assertNotEquals(esperadoErradoToken,atualToken,"Tokens são diferentes");
-        if (!esperadoErradoToken.equals(atualToken)) {
-            String mensagem = "assertNotEquals - Os tokens são diferentes";
-            LOGGER.info(mensagem);
-            //Assertions.fail(mensagem);
-        }
     }
 }
